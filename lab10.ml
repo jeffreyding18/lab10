@@ -361,7 +361,7 @@ type complexity =
 
 (* f(x) = 10000 *)
 let exercise9a () : complexity list =
-
+  failwith "exercise9b not implemented" ;;
 
 (* f(x) = 50n^100 + x^2 *)
 let exercise9b () : complexity list =
