@@ -2,7 +2,7 @@
                              CS51 Lab 10
                 Time Complexity, Big-O, and Recurrence
  *)
-
+open CS51
 (* Objective:
 
 This lab is intended to introduce you to concepts concerning
@@ -14,10 +14,10 @@ efficiency and complexity, including:
 (*======================================================================
 Part 1: Empirical analysis of functions
 
-In the reading, we empirically determined the efficiency of mergesort and 
+In the reading, we empirically determined the efficiency of mergesort and
 insertion sort by timing these functions on the same inputs of various
 lengths. The ability to perform empirical analysis of programs will
-often prove useful. 
+often prove useful.
 
 Throughout this lab you may find various functions in the CS51 module
 to be useful, as well as OCaml's Random library module
@@ -28,8 +28,10 @@ Exercise 1: Write a function, random_list, that creates a list of a
 specified length of random integers between 0 and 999.
 ....................................................................*)
 
-let random_list (length : int) : int list =
-  failwith "random_list not implemented" ;;
+let rec random_list (length : int) : int list =
+    if length = 0 then []
+    else (Random.int 1000) :: random_list (length - 1);;
+
 
 (*....................................................................
 Exercise 2: Write a function, time_sort, that, given an int list ->
@@ -38,12 +40,12 @@ sort takes.
 ....................................................................*)
 
 let time_sort (sort : int list -> int list) (lst : int list) : float =
-  failwith "time_sort not implemented";;
+    frt (call_timed sort lst) ;;
 
 (* We've provided implementations of merge sort and insertion sort
 here as modules satisfying the SORT signature so that you have some
 things to time. *)
-   
+
 module type SORT =
   sig
     (* sort lt xs -- Return the list xs sorted in increasing
@@ -61,7 +63,7 @@ module InsertSort : SORT =
       | [] -> [x]
       | hd :: tl -> if lt x hd then x :: xs
                     else hd :: (insert lt tl x) ;;
-      
+
     let rec sort (lt : 'a -> 'a -> bool)
                  (xs : 'a list)
             : 'list =
@@ -82,7 +84,7 @@ module MergeSort : SORT =
         | [hd] -> (hd :: half1, half2)
         | [] -> (half1, half2) in
       split' lst [] [];;
-      
+
     let rec merge (lt : 'a -> 'a -> bool)
                   (xs : 'a list)
                   (ys : 'a list)
@@ -92,7 +94,7 @@ module MergeSort : SORT =
                               else h2 :: merge lt xs t2
       | [], _ -> ys
       | _, [] -> xs ;;
-      
+
     let rec sort (lt : 'a -> 'a -> bool)
                  (xs : 'a list)
             : 'a list =
@@ -108,13 +110,25 @@ Exercise 3: List the functions provided by the InsertionSort
 module. List the functions provided by the MergeSort module.
 ....................................................................*)
 
-  
+
 (*....................................................................
 Exercise 4: Compare the time it takes for merge sort and insertion
 sort to run on lists of random ints of length 10 and 1000. We've
 included an implementation of merge and insertion sort below.
 ....................................................................*)
-  
+(*
+    time_sort (InsertSort.sort (<)) (random_list 10) ;;
+    - : float = 2.86102294921875e-06
+
+    time_sort (MergeSort.sort (<)) (random_list 10) ;;
+    - : float = 5.0067901611328125e-06
+
+    time_sort (InsertSort.sort (<)) (random_list 1000) ;;
+    - : float = 0.00992584228515625
+
+    time_sort (MergeSort.sort (<)) (random_list 1000) ;;
+    - : float = 0.000923871994018554688
+*)
 
 (*......................................................................
 Fill in the table below:
@@ -122,9 +136,9 @@ Fill in the table below:
                 |    List length 10    |  List length 1000
                 |    Time (seconds)    |  Time (seconds)
 ------------------------------------------------------------
-Insertion Sort  |                      |
+Insertion Sort  | 2.86102294921875e-06 | 0.00992584228515625
 ------------------------------------------------------------
-Merge Sort      |                      |
+Merge Sort      | 5.00679016113125e-06 | 0.00092387199401855
 ------------------------------------------------------------
 
 ......................................................................*)
@@ -158,7 +172,7 @@ of the solution to each exercise is a list of complexity classes.
 By way of example, we've done the first problem for you:
 
 (* f(x) = 5^x + x^3 *)
-let exercise5a () : complexity list = 
+let exercise5a () : complexity list =
   [Exponential] ;;
 ......................................................................*)
 
@@ -173,23 +187,24 @@ type complexity =
 
 (* f(x) = 5^x + x^3 *)
 let exercise5a () : complexity list =
-  [Exponential] ;;
+    [Exponential] ;;
 
 (* f(x) = 0 *)
 let exercise5b () : complexity list =
-  failwith "exercise5b not implemented" ;;
+    [Constant; Logarithmic; Linear; LogLinear; Quadratic; Cubic; Exponential] ;;
 
 (* f(x) = 3 x^2 + 2 x + 4 *)
 let exercise5c () : complexity list=
-  failwith "exercise5c not implemented" ;;
+    [Quadratic; Cubic; Exponential] ;;
 
 (* f(x) = (2 x - 3) log(x) + 100 x *)
 let exercise5d () : complexity list =
-  failwith "exercise5d not implemented" ;;
+    [LogLinear; Quadratic; Cubic; Exponential] ;;
 
-(* f(x) = x (x2 + x) *)
+(* f(x) = x (x^2 + x) *)
 let exercise5e () : complexity list =
-  failwith "exercise5e not implemented" ;;
+    [Cubic; Exponential] ;;
+
 
 
 (* One advantage of big-O is that we can disregard constants in
@@ -198,7 +213,7 @@ that on large inputs, merge sort worked faster than insertion
 sort. The ability to disregard constants tells us that merge sort will
 eventually be faster than insertion sort, even if we add a constant
 amount of time to merge sort's performance. Let's do this and test the
-results empirically. 
+results empirically.
 
 Here is a version of merge sort that inserts a small delay (.05
 seconds), to simulate a version of the function with the same
@@ -227,9 +242,9 @@ Fill in the below table.
 (*               |    List length 10    |  List length 1000
                  |    Time (seconds)    |  Time (seconds)
 ------------------------------------------------------------
-Insertion Sort   |                      |
+Insertion Sort   | 2.86102294921875e-06 | 0.00992584228515625
 ------------------------------------------------------------
-Delay Merge Sort |                      |
+Delay Merge Sort | 0.051609039306640625 | 0.0555541515350341
 ------------------------------------------------------------*)
 
 (* You likely found that InsertSort was faster than DelayMergeSort,
@@ -237,8 +252,18 @@ even on a list of length 1000. Increase the length of the list being
 sorted by DelayMergeSort and InsertSort until DelayMergeSort runs
 faster than InsertSort. Record the size of a list for which this is
 true below. *)
-   
-let exercise6 () = failwith "exercise6 not implemented"
+
+let check (start : int) : int =
+    let rec comp i =
+        if (random_list i |> time_sort(InsertSort.sort (<))) < (random_list i |> time_sort(DelayMergeSort.sort (<))) then
+            comp (i + 10)
+        else i
+    in
+    comp start ;;
+
+let exercise6 = 2550;; (* ~ish *)
+
+
 
 (* Big-O also allows us to disregard constant multiplicative factors. In
 this exercise, we work with a version of MergeSort that sorts a given
@@ -255,7 +280,7 @@ module DoubleMergeSort : SORT =
       let _ = MergeSort.sort lt xs in
       MergeSort.sort lt xs  ;;
   end ;;
-  
+
 (*....................................................................
 Exercise 7: Multiplicative constant factors
 
@@ -274,7 +299,7 @@ Double Merge Sort |                      |
 
 (* Now record a list length for which you found DoubleMergeSort
 sorted faster than InsertSort. *)
-   
+
 let exercise7 () = failwith "exercise6 not implemented"
 
 (* An additional nice property of big-O is the ability to disregard
@@ -336,8 +361,8 @@ type complexity =
 
 (* f(x) = 10000 *)
 let exercise9a () : complexity list =
-  failwith "exercise9a not implemented" ;;
-  
+
+
 (* f(x) = 50n^100 + x^2 *)
 let exercise9b () : complexity list =
   failwith "exercise9b not implemented" ;;
@@ -432,7 +457,7 @@ statement. Although the recurrence equations have two constants (c and
 k), we use the ocaml variable k to play both of those roles.  Please
 follow that format in all the following exercises.
 ......................................................................*)
-  
+
 let rec time_insert (n : int) : int =
     if n = 0 then k
     else k + time_insert (n - 1) ;;
@@ -440,7 +465,7 @@ let rec time_insert (n : int) : int =
 (* Note that this function will run forever on inputs below 0. We would
 normally expect you to handle invalid inputs. However, for the purpose
 of practicing recurrence equations, you may assume inputs will be
-positive. 
+positive.
 
 For the time complexity, we use a value from the complexity type to
 express the tightest big-O bound for this linear function. *)
@@ -453,7 +478,7 @@ equations, and add them to the lab using the method above.
 
                             END OF EXAMPLE
  *)
-  
+
 (*......................................................................
 Exercise 10: Sum recurrence equations
 
@@ -471,7 +496,7 @@ ocaml function *)
 let time_sum (n : int) : int =
   failwith "time_sum not yet implemented" ;;
 
-(* What is its complexity? *) 
+(* What is its complexity? *)
 let sum_complexity () : complexity =
   failwith "sum_complexity not yet implemented" ;;
 
@@ -486,7 +511,7 @@ let rec divider (x : int) : int =
   if x < 0 then raise (Invalid_argument "only positive numbers accepted")
   else if x <= 1 then 0
   else 1 + divider (x / 2);;
-  
+
 let time_divider (n : int) : int =
   failwith "time_sum not yet implemented" ;;
 
@@ -551,11 +576,11 @@ let mult_repeated_addition (x : int) (y : int) =
     else if y = 0 then 0
     else helper (y - 1) (sum + (abs x)) in
   helper (abs y) 0 * (sign_product x y) ;;
-  
+
 (* The gradeschool multiplication algorithm is the algorithm one would
 use when doing multiplication of large numbers on paper. To multiple
 two n-digit numbers together using this algorithm takes time O(n^2) *)
-  
+
 let mult_grade_school (x : int) (y : int) =
   let product_sign = sign_product x y in
   let x = abs x in
@@ -588,7 +613,7 @@ of log base 2 of 3, which is about n^1.4.
 *You do not need to understand the algorithm for this class*, but can
 find out more on wikipedia if interested:
 https://en.wikipedia.org/wiki/Karatsuba_algorithm *)
-  
+
 let mult_karatsuba (x : int) (y : int) : int =
   let tens_power (power : int) : int =
     let num_string = "1" ^ (String.make power '0') in
@@ -613,7 +638,7 @@ Exercise 13: Write a function, time_multiply, that, given a
 multiplication function and two integers, times how long the algorithm
 takes to multiply the integers.
 ......................................................................*)
-  
+
 let time_multiply (mult : int -> int -> int)
                   (x : int)
                   (y : int)
@@ -658,4 +683,3 @@ Questions to consider:
 5) What size integers do you typically multiply?
 6) Which algorithm, then, would you consider the best?
 ......................................................................*)
-
